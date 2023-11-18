@@ -10,6 +10,13 @@ use App\Models\User;
 
 class MerchantService
 {
+    protected $merchant;
+    protected $user;
+    public function __construct()
+    {
+        $this->merchant = new Merchant();
+        $this->user = new User();
+    }
     /**
      * Register a new user and associated merchant.
      * Hint: Use the password field to store the API key.
@@ -21,6 +28,39 @@ class MerchantService
     public function register(array $data): Merchant
     {
         // TODO: Complete this method
+        $user = $this->user;
+
+        if (isset($data["name"]) && $data["name"]) {
+            $user->name = $data["name"];
+        }
+
+        if (isset($data["email"]) && $data["email"]) {
+            $user->email = $data["email"];
+        }
+
+        if (isset($data["password"]) && $data["password"]) {
+            $user->password = $data["password"];
+        }
+
+        $user->type = $this->user::TYPE_MERCHANT;
+
+        $user->save();
+
+        $merchant = $this->merchant;
+
+        $merchant->user_id = $user->id;
+
+        if (isset($data["domain"]) && $data["domain"]) {
+            $merchant->domain = $data["domain"];
+        }
+
+        if (isset($data["name"]) && $data["name"]) {
+            $merchant->display_name = $data["name"];
+        }
+
+        $merchant->save();
+
+        return $merchant;
     }
 
     /**
