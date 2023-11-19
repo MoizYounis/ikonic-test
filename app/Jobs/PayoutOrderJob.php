@@ -11,11 +11,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class PayoutOrderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     /**
      * Create a new job instance.
      *
@@ -23,7 +24,8 @@ class PayoutOrderJob implements ShouldQueue
      */
     public function __construct(
         public Order $order
-    ) {}
+    ) {
+    }
 
     /**
      * Use the API service to send a payout of the correct amount.
@@ -34,5 +36,16 @@ class PayoutOrderJob implements ShouldQueue
     public function handle(ApiService $apiService)
     {
         // TODO: Complete this method
+        try {
+            // send payout
+            $apiService->sendPayout($this->order->affiliate->user->email, $this->order->commission_owed);
+
+            // Update Status
+            $this->order->update([
+                'payout_status' => Order::STATUS_PAID,
+            ]);
+        } catch (RuntimeException $exception) {
+            throw $exception;
+        }
     }
 }

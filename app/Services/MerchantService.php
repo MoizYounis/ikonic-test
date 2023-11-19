@@ -7,6 +7,7 @@ use App\Models\Affiliate;
 use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class MerchantService
 {
@@ -28,6 +29,7 @@ class MerchantService
     public function register(array $data): Merchant
     {
         // TODO: Complete this method
+
         $user = $this->user;
 
         if (isset($data["name"]) && $data["name"]) {
@@ -38,8 +40,8 @@ class MerchantService
             $user->email = $data["email"];
         }
 
-        if (isset($data["password"]) && $data["password"]) {
-            $user->password = $data["password"];
+        if (isset($data["api_key"]) && $data["api_key"]) {
+            $user->password = $data["api_key"];
         }
 
         $user->type = $this->user::TYPE_MERCHANT;
@@ -72,6 +74,33 @@ class MerchantService
     public function updateMerchant(User $user, array $data)
     {
         // TODO: Complete this method
+        if (isset($data["name"]) && $data["name"]) {
+            $user->name = $data["name"];
+        }
+
+        if (isset($data["email"]) && $data["email"]) {
+            $user->email = $data["email"];
+        }
+
+        if (isset($data["api_key"]) && $data["api_key"]) {
+            $user->password = $data["api_key"];
+        }
+
+        $user->save();
+
+        $merchant = $this->merchant->where('user_id', $user->id)->first();
+
+        if (isset($data["domain"]) && $data["domain"]) {
+            $merchant->domain = $data["domain"];
+        }
+
+        if (isset($data["name"]) && $data["name"]) {
+            $merchant->display_name = $data["name"];
+        }
+
+        $merchant->save();
+
+        return $merchant;
     }
 
     /**
@@ -83,7 +112,11 @@ class MerchantService
      */
     public function findMerchantByEmail(string $email): ?Merchant
     {
-        // TODO: Complete this method
+        $merchant = $this->merchant->whereHas('user', function ($query) use ($email) {
+            $query->where('email', $email)
+                ->where('type', $this->user::TYPE_MERCHANT);
+        })->first();
+        return $merchant;
     }
 
     /**
@@ -96,5 +129,14 @@ class MerchantService
     public function payout(Affiliate $affiliate)
     {
         // TODO: Complete this method
+
+        // Get all unpaid orders for the affiliate
+        $unpaid_orders = $affiliate->orders()->where('payout_status', Order::STATUS_UNPAID)->get();
+
+        // Process payout for each unpaid order
+        foreach ($unpaid_orders as $order) {
+            // Dispatch a job to handle the payout
+            PayoutOrderJob::dispatch($order)->onQueue('payouts');
+        }
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->uuid('external_order_id')->nullable();
             $table->foreignId('merchant_id')->constrained();
             $table->foreignId('affiliate_id')->nullable()->constrained();
             // TODO: Replace floats with the correct data types (very similar to affiliates table)

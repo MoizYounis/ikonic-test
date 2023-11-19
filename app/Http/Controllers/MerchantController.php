@@ -2,39 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Enum\ResponseMessages;
-use App\Http\Requests\MerchantRequest;
+use App\Models\Order;
 use App\Models\Merchant;
+use Illuminate\Http\Request;
+use App\Enum\ResponseMessages;
+use Illuminate\Support\Carbon;
 use App\Services\MerchantService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\MerchantRequest;
 
 class MerchantController extends Controller
 {
-    protected $merchant;
+    protected $order;
     public function __construct(
         MerchantService $merchantService
     ) {
-        $this->merchant = $merchantService;
-    }
-
-    public function register(MerchantRequest $request)
-    {
-        try {
-            DB::beginTransaction();
-            $merchant = $this->merchant->register($request->prepareRequest());
-            if ($merchant) {
-                DB::commit();
-                return $this->sendJson(true, "Merchant Registered Successfully!");
-            }
-            return $this->sendJson(false, ResponseMessages::MESSAGE_500);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            logMessage("merchant/register", $request->all(), $th->getMessage());
-            return $this->sendJson(false, ResponseMessages::MESSAGE_500);
-        }
+        $this->order = new Order();
     }
     /**
      * Useful order statistics for the merchant API.
@@ -45,6 +29,32 @@ class MerchantController extends Controller
     public function orderStats(Request $request): JsonResponse
     {
         // TODO: Complete this method
-        return $this->sendJson(true, "Success");
+
+        // from and to dates from the request
+        $from = $request->input('from');
+        $to = $request->input('to');
+
+        // Get orders within the specified date range
+        $orders = $this->order::where('merchant_id', auth()->user()->merchant->id)
+            ->whereBetween('created_at', [$from, $to])
+            ->get();
+
+        // Filter orders with an affiliate
+        $ordersWithAffiliate = $orders->where('affiliate_id', '!=', null);
+
+        // Calculate the count, revenue, and commissions_owed
+        $count = $orders->count();
+        $revenue = $orders->sum('subtotal');
+        $commissionsOwed = $ordersWithAffiliate->sum('commission_owed');
+
+        // Prepare the response data
+        $data = [
+            'count' => $count,
+            'revenue' => $revenue,
+            'commissions_owed' => $commissionsOwed,
+        ];
+
+        // Return the response as JSON
+        return response()->json($data);
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class AffiliateCreated extends Mailable
 {
@@ -19,7 +20,8 @@ class AffiliateCreated extends Mailable
      */
     public function __construct(
         public Affiliate $affiliate
-    ) {}
+    ) {
+    }
 
     /**
      * Build the message.
