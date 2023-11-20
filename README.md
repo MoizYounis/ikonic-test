@@ -1,7 +1,7 @@
 Here's a step-by-step guide to clone the repository, set up the project, and run the tests:
 
 1. Clone Repository
-   Open your terminal and run the following command to clone the repository: git clone https://github.com/MoizYounis/ikonic-test.git
+   Open your terminal and run the following command to clone the repository: git clone https://github.com/MoizYounis/ikonic-test.git folder-name
 
 2. Navigate to Project Folder
    Change your current directory to the project folder: cd folder-name
