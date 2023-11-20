@@ -1,4 +1,4 @@
-Here's a step-by-step guide to clone the repository, set up the Laravel project, and run the tests:
+Here's a step-by-step guide to clone the repository, set up the project, and run the tests:
 
 1. Clone Repository
    Open your terminal and run the following command to clone the repository: git clone https://github.com/MoizYounis/ikonic-test.git
