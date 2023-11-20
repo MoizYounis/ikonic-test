@@ -30,6 +30,8 @@ class MerchantService
     {
         // TODO: Complete this method
 
+        // Create new User
+
         $user = $this->user;
 
         if (isset($data["name"]) && $data["name"]) {
@@ -48,6 +50,7 @@ class MerchantService
 
         $user->save();
 
+        // Create merchant
         $merchant = $this->merchant;
 
         $merchant->user_id = $user->id;
@@ -74,6 +77,9 @@ class MerchantService
     public function updateMerchant(User $user, array $data)
     {
         // TODO: Complete this method
+
+        // Update merchant
+
         if (isset($data["name"]) && $data["name"]) {
             $user->name = $data["name"];
         }
@@ -112,6 +118,7 @@ class MerchantService
      */
     public function findMerchantByEmail(string $email): ?Merchant
     {
+        // get merchant by email
         $merchant = $this->merchant->whereHas('user', function ($query) use ($email) {
             $query->where('email', $email)
                 ->where('type', $this->user::TYPE_MERCHANT);

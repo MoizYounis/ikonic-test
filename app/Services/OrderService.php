@@ -51,7 +51,7 @@ class OrderService
 
         // Register the affiliate with the provided customer email and name
         $this->affiliateService->register(
-            $affiliate->merchant, // Pass the merchant instance instead of the affiliate
+            $affiliate->merchant, // Pass the merchant instance
             $data['customer_email'],
             $data['customer_name'],
             0.1

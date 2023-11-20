@@ -40,7 +40,7 @@ class PayoutOrderJob implements ShouldQueue
             // send payout
             $apiService->sendPayout($this->order->affiliate->user->email, $this->order->commission_owed);
 
-            // Update Status
+            // Update  order Status
             $this->order->update([
                 'payout_status' => Order::STATUS_PAID,
             ]);
